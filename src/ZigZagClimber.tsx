@@ -235,7 +235,7 @@ export default function ZigZagClimber() {
   // ===== Init =====
   const reset = (hard = false) => {
     const s = state.current;
-    s.camY = 0;
+    s.camY = s.baseY - s.tile * 2;
     s.player = { x: s.baseX, y: s.baseY };
     s.nextIndex = 0;
     s.speed = 70; s.timeMax = 2.2; s.timeLeft = s.timeMax;
