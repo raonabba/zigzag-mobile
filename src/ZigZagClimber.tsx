@@ -471,10 +471,10 @@ export default function ZigZagClimber() {
           </div>
           <div className="relative" style={{ touchAction: "none" }}>
             <canvas
-              ref={canvasRef}
-              className="w-full block"
-              style={{ display: "block", background: "transparent", touchAction: "none", maxHeight: "calc(100svh - 140px)" }}
-            />
+  ref={canvasRef}
+  className="w-full block"
+  style={{ display: "block", background: "transparent", touchAction: "none" }}
+/>
             {/* Big on-screen buttons remain for accessibility but gestures work anywhere */}
             <div className="absolute inset-x-0 bottom-3 flex items-center justify-center gap-4 px-3 pointer-events-auto">
               <Button label="전진 ⬆" onDown={() => handleForward()} />
