@@ -336,7 +336,7 @@ export default function ZigZagClimber() {
     if (!running || gameOver) { draw(); return; }
     const s = state.current;
     s.timeLeft -= dt; if (s.timeLeft <= 0) { doGameOver("시간 초과!"); return; }
-    const targetCam = Math.max(0, s.baseY - s.player.y + s.tile * 6);
+    const targetCam = Math.max(0, s.baseY - s.player.y + s.tile * 7);
     if (s.camY < targetCam) s.camY = Math.min(targetCam, s.camY + s.speed * dt);
     draw();
     if (s.player.y + s.tile - s.camY > s.h) doGameOver("뒤처졌어요!");
