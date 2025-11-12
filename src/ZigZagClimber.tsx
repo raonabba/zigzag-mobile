@@ -453,16 +453,16 @@ export default function ZigZagClimber() {
   }, []);
 
   return (
-    <div
-      className="w-full grid place-items-center text-white"
-      style={{
-        height: "100svh",
-        minHeight: "560px",
-        background: "linear-gradient(180deg, #0b1026 0%, #0f1220 60%, #0f1220 100%)",
-        touchAction: "none",
-        paddingBottom: "env(safe-area-inset-bottom)",
-      }}
-    >
+  <div
+    className="w-full grid place-items-center text-white h-screen-fixed"
+    style={{
+      /* height 제거 */
+      minHeight: "560px",
+      background: "linear-gradient(180deg, #0b1026 0%, #0f1220 60%, #0f1220 100%)",
+      touchAction: "none",
+      paddingBottom: "calc(env(safe-area-inset-bottom) + 8px)",
+    }}
+  >
       <div className="w-full max-w-[520px] p-3">
         <div className="rounded-2xl border border-white/10 shadow-xl overflow-hidden">
           <div className="p-3 sm:p-4 bg-white/5 flex items-center justify-between">
