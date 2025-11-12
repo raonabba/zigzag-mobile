@@ -270,13 +270,13 @@ export default function ZigZagClimber() {
     const c = canvasRef.current; if (!c) return;
     const lastTap = { t: 0 };
     let pressTimer: number | null = null;
-    let longPressFired = False;
+    let longPressFired = false;
 
     const onPointerDown = (e: Event) => {
       e.preventDefault();
-      if (gameOver) { setGameOver(False); reset(true); setRunning(true); return; }
+      if (gameOver) { setGameOver(false); reset(true); setRunning(true); return; }
       if (!running) setRunning(true);
-      longPressFired = False;
+      longPressFired = false;
       pressTimer = window.setTimeout(() => { longPressFired = true; handleRotate(); }, 350);
     };
     const onPointerUp = (e: Event) => {
@@ -293,11 +293,11 @@ export default function ZigZagClimber() {
       }
     };
 
-    c.addEventListener("touchstart", onPointerDown, { passive: False });
-    c.addEventListener("touchend", onPointerUp, { passive: False });
-    c.addEventListener("mousedown", onPointerDown as any, { passive: False } as any);
-    c.addEventListener("mouseup", onPointerUp as any, { passive: False } as any);
-    c.addEventListener("gesturestart", (ev) => ev.preventDefault() as any, { passive: False } as any);
+    c.addEventListener("touchstart", onPointerDown, { passive: false });
+    c.addEventListener("touchend", onPointerUp, { passive: false });
+    c.addEventListener("mousedown", onPointerDown as any, { passive: false } as any);
+    c.addEventListener("mouseup", onPointerUp as any, { passive: false } as any);
+    c.addEventListener("gesturestart", (ev) => ev.preventDefault() as any, { passive: false } as any);
     return () => {
       c.removeEventListener("touchstart", onPointerDown as any);
       c.removeEventListener("touchend", onPointerUp as any);
