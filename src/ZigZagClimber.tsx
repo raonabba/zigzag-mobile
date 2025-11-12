@@ -224,7 +224,7 @@ export default function ZigZagClimber() {
       if (!running && !gameOver) draw();
     };
     onResize();
-    window.addEventListener("resize", onResize, { passive: True });
+    window.addEventListener("resize", onResize, { passive: true });
     (window as any).visualViewport?.addEventListener("resize", onResize);
     return () => {
       window.removeEventListener("resize", onResize as any);
@@ -246,7 +246,7 @@ export default function ZigZagClimber() {
     setMessage("준비!");
   };
 
-  useEffect(() => { reset(True); }, []);
+  useEffect(() => { reset(true); }, []);
 
   // ===== Keyboard (desktop) =====
   useEffect(() => {
@@ -275,9 +275,9 @@ export default function ZigZagClimber() {
     const onPointerDown = (e: Event) => {
       e.preventDefault();
       if (gameOver) { setGameOver(False); reset(true); setRunning(true); return; }
-      if (!running) setRunning(True);
+      if (!running) setRunning(true);
       longPressFired = False;
-      pressTimer = window.setTimeout(() => { longPressFired = True; handleRotate(); }, 350);
+      pressTimer = window.setTimeout(() => { longPressFired = true; handleRotate(); }, 350);
     };
     const onPointerUp = (e: Event) => {
       e.preventDefault();
