@@ -221,8 +221,10 @@ export default function ZigZagClimber() {
       s.w = c.width / pr; s.h = c.height / pr;
       s.tile = Math.max(28, Math.floor(Math.min(s.w, s.h) / 14));
       s.baseX = Math.floor(s.w / 2); s.baseY = s.h - s.tile * 2;
-      if (!running && !gameOver) draw();
-    };
+      if (!running && !gameOver) {
+  s.camY = s.baseY - s.tile * 2;
+  draw();
+}
     onResize();
     window.addEventListener("resize", onResize, { passive: true });
     (window as any).visualViewport?.addEventListener("resize", onResize);
