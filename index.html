@@ -10,6 +10,16 @@
     <!-- Tailwind via CDN (no build setup needed) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+  :root { --vh: 1vh; }               /* 폴백 변수 */
+  html, body, #root { height: 100%; margin: 0; }
+  body { background:#0f1220; overscroll-behavior: none; }
+  /* 실제 화면 높이: dvh 지원되면 100dvh, 아니면 --vh*100 */
+  .h-screen-fixed { height: calc(var(--vh, 1vh) * 100); }
+  @supports (height: 100dvh) {
+    .h-screen-fixed { height: 100dvh; }
+  }
+</style>
+      <style>
       html, body, #root { height: 100%; margin: 0; }
       body { background: #0f1220; overscroll-behavior: none; }
       /* optional: prevent double-tap zoom on iOS */
