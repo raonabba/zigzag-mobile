@@ -205,16 +205,55 @@ export default function ZigZagClimber() {
   });
 
   // ===== Resize =====
-  useEffect(() => {
-    const onResize = () => {
-      const parent = canvasRef.current?.parentElement;
-      if (!parent || !canvasRef.current) return;
-      const pr = window.devicePixelRatio || 1;
-      // iOS Safari address bar height changes: prefer visualViewport
-      const vvh = (window as any).visualViewport?.height || window.innerHeight;
-      const width = Math.min(parent.clientWidth, 520);
-      // ⬇︎ 추가: 하단 UI(버튼) 높이 확보
-const UI_BOTTOM = 96;
+useEffect(() => {
+  const onResize = () => {
+    const parent = canvasRef.current?.parentElement;
+    if (!parent || !canvasRef.current) return;
+
+    const pr = window.devicePixelRatio || 1;
+
+    // iOS Safari address bar height changes: prefer visualViewport
+    const vvh = (window as any).visualViewport?.height || window.innerHeight;
+
+    // 캔버스 높이에서 하단 버튼 UI 여유 높이 확보
+    const UI_BOTTOM = 96;
+    const width = Math.min(parent.clientWidth, 520);
+    const height = Math.max(480, Math.min(vvh, 900) - UI_BOTTOM);
+
+    const c = canvasRef.current;
+    c.width = width * pr;
+    c.height = height * pr;
+    c.style.width = width + "px";
+    c.style.height = height + "px";
+
+    const s = state.current;
+    s.w = c.width / pr;
+    s.h = c.height / pr;
+
+    s.tile = Math.max(28, Math.floor(Math.min(s.w, s.h) / 14));
+    s.baseX = Math.floor(s.w / 2);
+    s.baseY = s.h - s.tile * 2;
+
+    // 정지/게임오버 상태에서는 카메라를 안전 위치로 재정렬하고 즉시 그립니다.
+    if (!running && !gameOver) {
+      s.camY = s.baseY - s.tile * 2;
+      draw();
+    }
+  };
+
+  // 최초 1회 강제 리사이즈
+  onResize();
+
+  // addEventListener 등록
+  window.addEventListener("resize", onResize, { passive: true });
+  (window as any).visualViewport?.addEventListener?.("resize", onResize);
+
+  // 정리(cleanup)
+  return () => {
+    window.removeEventListener("resize", onResize);
+    (window as any).visualViewport?.removeEventListener?.("resize", onResize);
+  };
+}, [running, gameOver]); // <- 의존성 명시 (안전)
 
 // 기존
 // const height = Math.min(vvh, 900);
