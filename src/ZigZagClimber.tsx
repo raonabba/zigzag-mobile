@@ -213,17 +213,27 @@ export default function ZigZagClimber() {
       // iOS Safari address bar height changes: prefer visualViewport
       const vvh = (window as any).visualViewport?.height || window.innerHeight;
       const width = Math.min(parent.clientWidth, 520);
-      const height = Math.min(vvh, 900);
+      // ⬇︎ 추가: 하단 UI(버튼) 높이 확보
+const UI_BOTTOM = 96;
+
+// 기존
+// const height = Math.min(vvh, 900);
+
+// 변경
+const height = Math.max(480, Math.min(vvh, 900) - UI_BOTTOM);
       const c = canvasRef.current;
       c.width = width * pr; c.height = height * pr;
       c.style.width = width + "px"; c.style.height = height + "px";
       const s = state.current;
       s.w = c.width / pr; s.h = c.height / pr;
       s.tile = Math.max(28, Math.floor(Math.min(s.w, s.h) / 14));
-      s.baseX = Math.floor(s.w / 2); s.baseY = s.h - s.tile * 2;
-      if (!running && !gameOver) {
-  s.camY = s.baseY - s.tile * 2;
-  draw();
+      s.baseX = Math.floor(s.w / 2);
+s.baseY = s.h - s.tile * 2;
+
+// 이미 이 블록이 있다면 draw()를 남기고 camY만 추가
+if (!running && !gameOver) {
+  s.camY = s.baseY - s.tile * 2;  // ← 카메라 보정
+  draw();                          // ← 즉시 리렌더
 }
     onResize();
     window.addEventListener("resize", onResize, { passive: true });
@@ -314,14 +324,22 @@ export default function ZigZagClimber() {
     const step = s.steps[s.nextIndex];
     if (!step) return false;
     if (step.dir === s.facing) {
-      s.player = { x: step.x, y: step.y };
-      s.nextIndex++;
-      setScore(v => v + 1);
-      setCombo(c => Math.min(999, c + 1));
-      if (s.nextIndex % 5 === 0) { s.speed = Math.min(220, s.speed + 6); s.timeMax = Math.max(0.9, s.timeMax - 0.05); }
-      s.timeLeft = s.timeMax; setMessage("");
-      return true;
-    }
+  s.player = { x: step.x, y: step.y };
+  s.nextIndex++;
+  setScore(v => v + 1);
+  setCombo(c => Math.min(999, c + 1));
+  if (s.nextIndex % 5 === 0) {
+    s.speed = Math.min(220, s.speed + 6);
+    s.timeMax = Math.max(0.9, s.timeMax - 0.05);
+  }
+  s.timeLeft = s.timeMax; setMessage("");
+
+  // ⬇︎ 추가: 한 칸 전진할 때 카메라 목표치로 스냅(버벅임 방지)
+  const snapCam = Math.max(0, s.baseY - s.player.y + s.tile * 7);
+  if (s.camY < snapCam) s.camY = snapCam;
+
+  return true;
+}
     return false;
   }
 
@@ -342,7 +360,14 @@ export default function ZigZagClimber() {
     if (s.camY < targetCam) s.camY = Math.min(targetCam, s.camY + s.speed * dt);
     draw();
     if (s.player.y + s.tile - s.camY > s.h) doGameOver("뒤처졌어요!");
-    if (s.nextIndex + 120 > s.steps.length) {
+    // 기존
+// if (s.nextIndex + 120 > s.steps.length) {
+
+// 변경 (앞쪽에서 더 일찍 늘림)
+if (s.nextIndex + 60 > s.steps.length) {
+  const last = s.steps[s.steps.length - 1];
+  s.steps.push(...generateSteps(200, last.x, last.y, s.tile));
+}
       const last = s.steps[s.steps.length - 1];
       s.steps.push(...generateSteps(200, last.x, last.y, s.tile));
     }
