@@ -3,11 +3,12 @@ import React, { useEffect, useRef, useState } from "react";
 /**
  * ZigZag Climber — Canvas game (mobile-friendly)
  *
- * - iOS Safari viewport 대응 (visualViewport + UI_BOTTOM)
- * - reset() camY 초기값 보정
- * - advanceIfMatch() 카메라 스냅
- * - 계단 조기 추가 생성 임계치 조정
- * - 버튼 잘림 방지 (paddingBottom 확장 + zIndex)
+ * - camY 좌표계 통일: 화면 y = 월드 y - camY
+ * - 루프에서 camY 보간(부드러운 화면 추적)
+ * - 리사이즈 시 camY 변경 없이 즉시 draw만
+ * - 하단 버튼 영역 확보(UI_BOTTOM)
+ * - 계단 조기 추가 생성(끊김 방지)
+ * - 버튼 잘림 방지(paddingBottom + zIndex)
  */
 
 // ===== Colors =====
@@ -196,7 +197,7 @@ export default function ZigZagClimber() {
   const [score, setScore] = useState(0);
   const [high, setHigh] = useState<number>(() => Number(localStorage.getItem("zzc-high") || 0));
   const [combo, setCombo] = useState(0);
-  const [message, setMessage] = useState("전진(↑)/회전(스페이스)으로 올라가세요!");
+  const [message, setMessage] = useState("전진(탭)/회전(더블탭·길게)으로 올라가세요!");
 
   const state = useRef({
     w: 360,
@@ -204,7 +205,7 @@ export default function ZigZagClimber() {
     tile: 36,
     baseX: 0,
     baseY: 0,
-    camY: 0,
+    camY: 0, // 화면 y = 월드 y - camY
     steps: [] as Step[],
     player: { x: 0, y: 0 },
     facing: 1 as Dir,
@@ -242,9 +243,8 @@ export default function ZigZagClimber() {
       s.baseX = Math.floor(s.w / 2);
       s.baseY = s.h - s.tile * 2;
 
-      // 정지/게임오버 시 카메라 보정 + 즉시 그리기
+      // 정지/게임오버 시에는 camY를 건드리지 않고 다시 그리기만
       if (!running && !gameOver) {
-        s.camY = s.baseY - s.tile * 2;
         draw();
       }
     }
@@ -263,6 +263,7 @@ export default function ZigZagClimber() {
   // ===== Init =====
   const reset = (hard = false) => {
     const s = state.current;
+    s.camY = 0; // 좌표계 통일: camY는 0에서 시작, 위로 커짐
     s.player = { x: s.baseX, y: s.baseY };
     s.nextIndex = 0;
     s.speed = 70;
@@ -270,10 +271,6 @@ export default function ZigZagClimber() {
     s.timeLeft = s.timeMax;
     s.steps = generateSteps(200, s.player.x, s.player.y, s.tile);
     s.facing = s.steps[0]?.dir ?? 1;
-
-    // 카메라 초기 위치 보정 (화면 높이에 독립)
-    s.camY = s.baseY - s.tile * 2;
-
     if (hard) setScore(0);
     setCombo(0);
     setMessage("준비!");
@@ -381,11 +378,7 @@ export default function ZigZagClimber() {
       }
       s.timeLeft = s.timeMax;
       setMessage("");
-
-      // 카메라 스냅 (전진 직후 즉시 시야 보정)
-      const snapCam = Math.max(0, s.baseY - s.player.y + s.tile * 7);
-      if (s.camY < snapCam) s.camY = snapCam;
-
+      // 전진 직후 camY는 건드리지 않음 (루프에서 targetCam으로 보간 추적)
       return true;
     }
     return false;
@@ -423,19 +416,24 @@ export default function ZigZagClimber() {
       return;
     }
     const s = state.current;
+
+    // 제한시간
     s.timeLeft -= dt;
     if (s.timeLeft <= 0) {
       doGameOver("시간 초과!");
       return;
     }
-    const targetCam = Math.max(0, s.baseY - s.player.y + s.tile * 7); // 여유 +1타일
-    if (s.camY < targetCam) s.camY = Math.min(targetCam, s.camY + s.speed * dt);
+
+    // 카메라 추적 (보간)
+    const targetCam = Math.max(0, s.baseY - s.player.y + s.tile * 6); // 머리 위 여유 타일 6
+    s.camY += (targetCam - s.camY) * Math.min(1, 8 * dt); // 반응속도 8(6~12 조절 가능)
 
     draw();
 
+    // 화면 아래로 밀리면 게임오버
     if (s.player.y + s.tile - s.camY > s.h) doGameOver("뒤처졌어요!");
 
-    // 계단을 더 일찍 추가 생성
+    // 계단 조기 추가
     if (s.nextIndex + 60 > s.steps.length) {
       const last = s.steps[s.steps.length - 1];
       s.steps.push(...generateSteps(200, last.x, last.y, s.tile));
@@ -480,7 +478,7 @@ export default function ZigZagClimber() {
       const step = s.steps[i];
       const size = s.tile * 0.9;
       const sx = step.x - size / 2;
-      const sy = step.y - size / 2 - (s.camY - (s.baseY - s.tile * 2));
+      const sy = step.y - size / 2 - s.camY; // ← camY만 빼기(통일)
       if (sy > s.h + s.tile || sy < -s.tile * 2) continue;
       ctx.fillStyle = i % 2 ? palette.stair : palette.stairAlt;
       ctx.fillRect(sx, sy, size, size);
@@ -497,7 +495,7 @@ export default function ZigZagClimber() {
     // Player
     const pSize = s.tile * 0.9;
     const px = s.player.x;
-    const py = s.player.y - (s.camY - (s.baseY - s.tile * 2));
+    const py = s.player.y - s.camY; // ← camY만 빼기(통일)
     drawRobot(ctx, px, py, pSize, s.facing);
     ctx.fillStyle = palette.text;
     ctx.font = `700 ${Math.floor(s.tile * 0.45)}px Inter, system-ui`;
@@ -595,7 +593,6 @@ export default function ZigZagClimber() {
     <div
       className="w-full grid place-items-center text-white"
       style={{
-        // 전체 높이는 index.html에서 dvh 폴백으로 맞추는 것을 권장.
         minHeight: "560px",
         background:
           "linear-gradient(180deg, #0b1026 0%, #0f1220 60%, #0f1220 100%)",
