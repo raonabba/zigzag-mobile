@@ -2,41 +2,38 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="mobile-web-app-capable" content="yes" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
     <meta name="theme-color" content="#0f1220" />
+    <link rel="manifest" href="/manifest.json" />
     <title>ZigZag Climber</title>
-    <!-- Tailwind via CDN (no build setup needed) -->
-    <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
-  :root { --vh: 1vh; }               /* 폴백 변수 */
-  html, body, #root { height: 100%; margin: 0; }
-  body { background:#0f1220; overscroll-behavior: none; }
-  /* 실제 화면 높이: dvh 지원되면 100dvh, 아니면 --vh*100 */
-  .h-screen-fixed { height: calc(var(--vh, 1vh) * 100); }
-  @supports (height: 100dvh) {
-    .h-screen-fixed { height: 100dvh; }
-  }
-</style>
-      <style>
+      :root { --vh: 1vh; } /* dvh 폴백 */
       html, body, #root { height: 100%; margin: 0; }
-      body { background: #0f1220; overscroll-behavior: none; }
-      /* optional: prevent double-tap zoom on iOS */
-      * { touch-action: manipulation; }
+      body { background:#0f1220; color:#fff; overscroll-behavior: none; }
+      .h-screen-fixed { height: calc(var(--vh, 1vh) * 100); }
+      @supports (height: 100dvh) {
+        .h-screen-fixed { height: 100dvh; }
+      }
     </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root" class="h-screen-fixed"></div>
+
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- iOS Safari 주소줄 높이 대응 -->
     <script>
-  const setVH = () => {
-    const h = (window.visualViewport?.height || window.innerHeight) * 0.01;
-    document.documentElement.style.setProperty('--vh', `${h}px`);
-  };
-  setVH();
-  window.addEventListener('resize', setVH, { passive: true });
-  window.addEventListener('orientationchange', setVH, { passive: true });
-</script>
+      const setVH = () => {
+        const h = (window.visualViewport?.height || window.innerHeight) * 0.01;
+        document.documentElement.style.setProperty('--vh', `${h}px`);
+      };
+      setVH();
+      window.addEventListener('resize', setVH, { passive: true });
+      window.addEventListener('orientationchange', setVH, { passive: true });
+    </script>
   </body>
 </html>
