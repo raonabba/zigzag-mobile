@@ -1,8 +1,8 @@
 {
   "name": "ZigZag Climber",
   "short_name": "ZigZag",
-  "display": "standalone",
   "start_url": "/",
+  "display": "standalone",
   "background_color": "#0f1220",
   "theme_color": "#0f1220",
   "icons": []
