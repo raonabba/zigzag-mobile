@@ -1,0 +1,13 @@
+import React, { useRef, useEffect, useState } from 'react';
+type Dir=-1|1;type Step={x:number;y:number;dir:Dir};
+function genSteps(c:number,x:number,y:number,t:number){const a:Step[]=[];let d:Dir=Math.random()<0.5?-1:1;for(let i=0;i<c;i++){if(i>0&&Math.random()<0.4)d=(d*-1)as Dir;x+=d*t;y-=t;a.push({x,y,dir:d});}return a;}
+export default function ZigZagClimber(){const cv=useRef<HTMLCanvasElement|null>(null);const[r,setR]=useState(false);const[g,setG]=useState(false);const[scr,setScr]=useState(0);
+const st=useRef({w:360,h:640,t:36,bx:0,by:0,cam:0,steps:[] as Step[],p:{x:0,y:0},f:1 as Dir,i:0});
+const reset=()=>{const s=st.current;s.steps=genSteps(200,s.bx,s.by,s.t);s.i=0;s.p={x:s.bx,y:s.by};s.cam=s.by-s.t*4;s.f=s.steps[0].dir;setScr(0);setG(false);setR(false);};
+useEffect(()=>{reset();},[]);
+const forward=()=>{const s=st.current;if(g)return;if(!r)setR(true);const step=s.steps[s.i];if(step&&step.dir===s.f){s.p={x:step.x,y:step.y};s.i++;setScr(v=>v+1);}else setG(true);};
+const rotate=()=>{st.current.f=(st.current.f*-1)as Dir;};
+const draw=()=>{const s=st.current,ctx=cv.current?.getContext('2d');if(!ctx)return;ctx.fillStyle='#0f1220';ctx.fillRect(0,0,s.w,s.h);for(let i=0;i<s.steps.length;i++){const stp=s.steps[i];const sz=s.t*0.9;const sx=stp.x-sz/2;const sy=stp.y-sz/2-(s.cam-(s.by-s.t*6));if(sy>s.h||sy<-s.t*2)continue;ctx.fillStyle=i%2?'#9aa8ff':'#7d8bff';ctx.fillRect(sx,sy,sz,sz);}const px=s.p.x;const py=s.p.y-(s.cam-(s.by-s.t*6));ctx.fillStyle='#ffd166';ctx.beginPath();ctx.arc(px,py,s.t*0.4,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='20px Arial';ctx.fillText('Score: '+scr,10,30);if(g){ctx.fillStyle='#fff';ctx.font='30px Arial';ctx.fillText('GAME OVER',s.w/2-90,s.h/2);} };
+useEffect(()=>{const el=cv.current;if(!el)return;const rs=()=>{const p=window.devicePixelRatio||1;const w=el.clientWidth,h=el.clientHeight;el.width=w*p;el.height=h*p;const s=st.current;s.w=w;s.h=h;s.bx=w/2;s.by=h-s.t*2;draw();};rs();window.addEventListener('resize',rs);return()=>window.removeEventListener('resize',rs);},[]);
+useEffect(()=>{let last=0;const loop=(t:number)=>{const s=st.current;if(!r||g){draw();requestAnimationFrame(loop);return;}const dt=(t-last)/1000;last=t;const target=s.by-s.p.y+s.t*6;s.cam+=(target-s.cam)*0.1;draw();requestAnimationFrame(loop);};requestAnimationFrame(loop);},[r,g]);
+return<div style={{textAlign:'center'}}><canvas ref={cv} width={360} height={640} style={{width:'100%',background:'#0f1220'}}></canvas><div style={{marginTop:8}}><button onClick={forward}>전진 ⬆</button><button onClick={rotate} style={{marginLeft:10}}>회전 ↻</button><button onClick={reset} style={{marginLeft:10}}>리셋</button></div></div>; }
