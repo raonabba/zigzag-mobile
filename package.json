@@ -1,6 +1,6 @@
 {
-  "name": "zigzag-mobile",
-  "version": "1.0.0",
+  "name": "zigzag-mobile-robot",
+  "version": "1.3.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,10 +13,10 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@types/react": "^18.2.47",
+    "@types/react-dom": "^18.2.18",
     "@vitejs/plugin-react": "^4.3.2",
     "typescript": "^5.4.5",
-    "vite": "^5.1.0",
-    "@types/react": "^18.2.47",
-    "@types/react-dom": "^18.2.18"
+    "vite": "^5.1.0"
   }
 }

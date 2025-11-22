@@ -5,9 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#0f1220" />
     <title>ZigZag Climber</title>
+    <style>
+      :root { --vh: 1vh; }
+      html, body, #root { height: 100%; margin: 0; }
+      body { background:#0f1220; color:#fff; overscroll-behavior: none; }
+      .h-screen-fixed { height: calc(var(--vh, 1vh) * 100); }
+      @supports (height: 100dvh) { .h-screen-fixed { height: 100dvh; } }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root" class="h-screen-fixed"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      const setVH = () => {
+        const h = (window.visualViewport?.height || window.innerHeight) * 0.01;
+        document.documentElement.style.setProperty('--vh', `${h}px`);
+      };
+      setVH();
+      window.addEventListener('resize', setVH, { passive: true });
+      window.addEventListener('orientationchange', setVH, { passive: true });
+    </script>
   </body>
 </html>
